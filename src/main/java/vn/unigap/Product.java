@@ -17,11 +17,8 @@ public class Product {
     private String category;
     private String thumbnail;
     private List<String> images;
-    private transient boolean isDeleted;
-    private transient LocalDateTime deletedOn;
-    //"isDeleted" flag set to true
-    // and the "deletedOn" field containing the timestamp of deletion,
-    // but these fields will not be included in responses for other APIs.
+//    private transient boolean isDeleted;
+//    private transient LocalDateTime deletedOn;
 
 
     public int getId() {
@@ -112,19 +109,19 @@ public class Product {
         this.images = images;
     }
 
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
-
-    public LocalDateTime getDeletedOn() {
-        return deletedOn;
-    }
-
-    public void setDeletedOn(LocalDateTime deletedOn) {
-        this.deletedOn = deletedOn;
-    }
+//    public boolean isDeleted() {
+//        return isDeleted;
+//    }
+//
+//    public void setDeleted(boolean deleted) {
+//        isDeleted = deleted;
+//    }
+//
+//    public LocalDateTime getDeletedOn() {
+//        return deletedOn;
+//    }
+//
+//    public void setDeletedOn(LocalDateTime deletedOn) {
+//        this.deletedOn = deletedOn;
+//    }
 }

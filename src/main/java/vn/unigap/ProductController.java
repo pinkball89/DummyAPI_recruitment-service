@@ -26,6 +26,7 @@ public class ProductController {
     public String dummyApi() {
         return list.toString();
     }
+
     @GetMapping("/test/{input}")
     public String test(@PathVariable String input) {
         System.out.print(input);
@@ -34,12 +35,14 @@ public class ProductController {
         //http://localhost:8080/test/use
         //http://localhost:8080/test/add
     }
+
     @GetMapping("/testParam")
     public String testParam(@RequestParam String inputParam) {
         System.out.print(inputParam);
         return "Done " + inputParam;
         //localhost:8080/testParam?inputParam=testing
     }
+
     @GetMapping("/testParam2")
     public String testParam(@RequestParam String inputParam, @RequestParam String input2) {
         System.out.print(inputParam + " " + input2);
@@ -58,25 +61,18 @@ public class ProductController {
         List<Product> allProducts = productService.getAllProducts();
         int total = allProducts.size();
 
-        List<Product> paginatedProducts = allProducts.stream()
-                .skip(skip)
-                .limit(limit)
-                .collect(Collectors.toList());
+        if (limit == 0) {
+            limit = total;
+        }
+        List<Product> paginatedProducts = productService.getPaginatedProducts(limit, skip);
 
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new LinkedHashMap<>();
         response.put("products", paginatedProducts);
         response.put("total", total);
         response.put("skip", skip);
         response.put("limit", limit);
 
-        // Create a new map with keys in the desired order
-        Map<String, Object> orderedResponse = new LinkedHashMap<>();
-        orderedResponse.put("products", response.get("products"));
-        orderedResponse.put("total", response.get("total"));
-        orderedResponse.put("skip", response.get("skip"));
-        orderedResponse.put("limit", response.get("limit"));
-
-        return ResponseEntity.ok(orderedResponse);
+        return ResponseEntity.ok(response);
     }
 
     //Get a single product
@@ -85,30 +81,26 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
-    @GetMapping("/search")
-    public List<Product> searchProducts(@RequestParam(name = "keyword", required = false) String keyword) {
-        if (keyword == null || keyword.isEmpty()) {
+    @GetMapping("products/search")
+    public List<Product> searchProducts(@RequestParam(name = "q", required = false) String q) {
+        if (q == null || q.isEmpty()) {
             return productService.getAllProducts();
         } else {
             return productService.getAllProducts().stream()
-                    .filter(product -> product.getTitle().toLowerCase().contains(keyword.toLowerCase()))
+                    .filter(product -> product.getTitle().toLowerCase().contains(q.toLowerCase()) ||
+                            product.getDescription().toLowerCase().contains(q.toLowerCase()))
                     .collect(Collectors.toList());
         }
     }
 
-    @GetMapping("/categories")
+    @GetMapping("/products/categories")
     public List<String> getAllCategories() {
         return productService.getAllCategories();
     }
 
-    @GetMapping("/categories/{category}")
+    @GetMapping("products/category/{category}")
     public List<Product> getProductsByCategory(@PathVariable String category) {
         return productService.getProductsByCategory(category);
-    }
-
-    @GetMapping("/paginate")
-    public List<Product> getPaginatedProducts(@RequestParam int limit, @RequestParam int skip) {
-        return productService.getPaginatedProducts(limit, skip);
     }
 
     @PostMapping("/products/add")
@@ -116,29 +108,23 @@ public class ProductController {
         return productService.addProduct(product);
     }
 
-    @PutMapping("products/update/{id}")
+    @PutMapping("products/{id}")
     public Product updateProduct(@PathVariable int id, @RequestBody Product product) {
         return productService.updateProduct(id, product);
     }
 
-    @DeleteMapping("products/delete/{id}")
+    @DeleteMapping("products/{id}")
     public ResponseEntity<Map<String, Object>> deleteProduct(@PathVariable int id) {
         Product deletedProduct = productService.deleteProduct(id);
-//        if (deletedProduct != null) {
-            // Set deletion flag and timestamp
-            deletedProduct.setDeleted(true);
-            deletedProduct.setDeletedOn(LocalDateTime.now());
 
-            // Create response with deleted product details
-            Map<String, Object> response = new HashMap<>();
-            response.put("products", deletedProduct);
-            // Set other fields
-//            response.put("isDeleted", true);
-//            response.put("deletedOn", deletedProduct.getDeletedOn());
+        // Create response with deleted product details
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("products", deletedProduct);
+        // Set other fields
+        response.put("isDeleted", true);
+        response.put("deletedOn", LocalDateTime.now());
 
-            return ResponseEntity.ok(response);
-//        } else {
-//            return ResponseEntity.notFound().build();
-//        }
+        return ResponseEntity.ok(response);
+
     }
 }

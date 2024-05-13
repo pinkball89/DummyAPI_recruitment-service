@@ -77,11 +77,12 @@ public class ProductService{
     }
 
     public Product deleteProduct(int id) {
-        Product deletedProduct = products.remove(id);
-        if (deletedProduct == null) {
+        if (products.containsKey(id)) {
+            products.remove(id);
+        } else {
             throw new IllegalArgumentException("Product with id " + id + " not found");
         }
-        return deletedProduct;
+        return null;
     }
 
 }
